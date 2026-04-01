@@ -366,13 +366,27 @@
         background: #667eea;
         color: white;
       }
+
+      .chart-container {
+        position: relative;
+        height: 400px;
+        width: 100%;
+        margin-top: 30px;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
     <div class="container">
       <header>
         <h1>🔒 Anomaly Detection System</h1>
-        <p class="subtitle">Analysis using Isolation Forest - Machine Learning Model</p>
+        <p class="subtitle">
+          Analysis using Isolation Forest - Machine Learning Model
+        </p>
       </header>
 
       <div class="status" id="status">
@@ -416,7 +430,9 @@
             />
           </div>
 
-          <button onclick="trainModel()" style="width: 100%; padding: 15px;">🚀 Train Model</button>
+          <button onclick="trainModel()" style="width: 100%; padding: 15px">
+            🚀 Train Model
+          </button>
         </div>
 
         <!-- Mode upload file -->
@@ -436,12 +452,279 @@
               <div class="file-name" id="train-file-name"></div>
             </div>
 
-            <button onclick="trainModelUpload()" style="width: 100%; padding: 15px; margin-top: 15px;">🚀 Train from File</button>
+            <button
+              onclick="trainModelUpload()"
+              style="width: 100%; padding: 15px; margin-top: 15px"
+            >
+              🚀 Train from File
+            </button>
           </div>
         </div>
 
         <div id="train-spinner" class="spinner"></div>
         <div id="train-result" class="result"></div>
+        <div
+          id="train-metrics"
+          class="metrics-container"
+          style="display: none; margin-top: 30px"
+        >
+          <h3 style="color: #667eea; margin-bottom: 20px">
+            📊 Model Evaluation Metrics
+          </h3>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 15px;
+              margin-bottom: 25px;
+            "
+          >
+            <div
+              style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 8px;
+                text-align: center;
+              "
+            >
+              <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px">
+                Precision (Positive Predictive Value)
+              </div>
+              <div
+                id="metric-precision"
+                style="font-size: 32px; font-weight: bold"
+              >
+                --
+              </div>
+            </div>
+            <div
+              style="
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 8px;
+                text-align: center;
+              "
+            >
+              <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px">
+                Recall (Sensitivity)
+              </div>
+              <div
+                id="metric-recall"
+                style="font-size: 32px; font-weight: bold"
+              >
+                --
+              </div>
+            </div>
+            <div
+              style="
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 8px;
+                text-align: center;
+              "
+            >
+              <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px">
+                F1-Score (Most Important)
+              </div>
+              <div
+                id="metric-f1"
+                style="font-size: 32px; font-weight: bold; color: #ffeb3b"
+              >
+                --
+              </div>
+            </div>
+          </div>
+          <div
+            style="
+              background: white;
+              padding: 25px;
+              border-radius: 8px;
+              border: 1px solid #e0e0e0;
+            "
+          >
+            <h4 style="color: #333; margin-top: 0; margin-bottom: 20px">
+              🔲 Confusion Matrix
+            </h4>
+            <div
+              id="confusion-matrix"
+              style="
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+              "
+            >
+              <!-- Confusion matrix will be populated here -->
+            </div>
+          </div>
+
+          <!-- AUC Metrics -->
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 15px;
+              margin-top: 20px;
+            "
+          >
+            <div
+              style="
+                background: #e3f2fd;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 4px solid #2196f3;
+                text-align: center;
+              "
+            >
+              <div
+                style="
+                  font-size: 12px;
+                  color: #666;
+                  margin-bottom: 8px;
+                  font-weight: 600;
+                "
+              >
+                PR-AUC (Precision-Recall)
+              </div>
+              <div
+                id="metric-pr-auc"
+                style="font-size: 28px; font-weight: bold; color: #2196f3"
+              >
+                --
+              </div>
+            </div>
+            <div
+              style="
+                background: #fff3e0;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 4px solid #ff9800;
+                text-align: center;
+              "
+            >
+              <div
+                style="
+                  font-size: 12px;
+                  color: #666;
+                  margin-bottom: 8px;
+                  font-weight: 600;
+                "
+              >
+                ROC-AUC (Discrimination)
+              </div>
+              <div
+                id="metric-roc-auc"
+                style="font-size: 28px; font-weight: bold; color: #ff9800"
+              >
+                --
+              </div>
+            </div>
+            <div
+              style="
+                background: #f3e5f5;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 4px solid #9c27b0;
+                text-align: center;
+              "
+            >
+              <div
+                style="
+                  font-size: 12px;
+                  color: #666;
+                  margin-bottom: 8px;
+                  font-weight: 600;
+                "
+              >
+                Optimal Threshold
+              </div>
+              <div
+                id="metric-optimal-threshold"
+                style="font-size: 28px; font-weight: bold; color: #9c27b0"
+              >
+                --
+              </div>
+            </div>
+            <div
+              style="
+                background: #eceff1;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 4px solid #455a64;
+                text-align: center;
+              "
+            >
+              <div
+                style="
+                  font-size: 12px;
+                  color: #666;
+                  margin-bottom: 8px;
+                  font-weight: 600;
+                "
+              >
+                True Positives (TP)
+              </div>
+              <div
+                id="metric-tp-count"
+                style="font-size: 28px; font-weight: bold; color: #455a64"
+              >
+                --
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PR Curve Chart -->
+        <div
+          id="pr-curve-container"
+          class="chart-container"
+          style="display: none"
+        >
+          <h3 style="margin-bottom: 20px; color: #333">
+            📈 Precision-Recall Curve
+          </h3>
+          <canvas id="prCurveChart"></canvas>
+        </div>
+
+        <!-- ROC Curve Chart -->
+        <div
+          id="roc-curve-container"
+          class="chart-container"
+          style="display: none"
+        >
+          <h3 style="margin-bottom: 20px; color: #333">📊 ROC Curve</h3>
+          <canvas id="rocCurveChart"></canvas>
+        </div>
+
+        <!-- Threshold Analysis Chart -->
+        <div
+          id="threshold-container"
+          class="chart-container"
+          style="display: none"
+        >
+          <h3 style="margin-bottom: 20px; color: #333">
+            🎯 Threshold vs Metrics
+          </h3>
+          <canvas id="thresholdChart"></canvas>
+        </div>
+
+        <!-- Score Distribution Chart -->
+        <div
+          id="distribution-container"
+          class="chart-container"
+          style="display: none"
+        >
+          <h3 style="margin-bottom: 20px; color: #333">
+            📉 Anomaly Score Distribution
+          </h3>
+          <canvas id="distributionChart"></canvas>
+          <h3 style="margin-bottom: 20px; color: #333">
+            📈 Accuracy Curve During Training
+          </h3>
+          <canvas id="trainingChart"></canvas>
+        </div>
       </div>
 
       <!-- Tab Single Prediction -->
@@ -456,7 +739,12 @@
 
           <div class="form-group">
             <label for="ip-address">IP Address:</label>
-            <input type="text" id="ip-address" placeholder="192.168.1.1" value="192.168.1.1" />
+            <input
+              type="text"
+              id="ip-address"
+              placeholder="192.168.1.1"
+              value="192.168.1.1"
+            />
           </div>
 
           <div class="form-group">
@@ -473,7 +761,12 @@
 
           <div class="form-group">
             <label for="city">City:</label>
-            <input type="text" id="city" placeholder="San Francisco" value="San Francisco" />
+            <input
+              type="text"
+              id="city"
+              placeholder="San Francisco"
+              value="San Francisco"
+            />
           </div>
 
           <div class="form-group">
@@ -521,8 +814,8 @@
             <input type="number" id="device-change" min="0" max="1" value="0" />
           </div>
 
-          <div class="form-grouprfff-dataset.csv"
-              value="data/rfff-dataset"
+          <div class="form-group">
+            <label for="login-result"
               >Login Result (0=Success, 1=Failure):</label
             >
             <input type="number" id="login-result" min="0" max="1" value="1" />
@@ -564,19 +857,21 @@
                 placeholder="data/rfff-dataset.csv"
                 value="data/rfff-dataset.csv"
               />
-              <small style="color: #666; display: block; margin-top: 5px;">
+              <small style="color: #666; display: block; margin-top: 5px">
                 Full path to your CSV file containing login records
               </small>
             </div>
 
-            <button onclick="predictBatch()" style="width: 100%; padding: 15px;">📊 Predict Batch</button>
+            <button onclick="predictBatch()" style="width: 100%; padding: 15px">
+              📊 Predict Batch
+            </button>
           </div>
         </div>
 
         <!-- Mode upload file -->
         <div id="batch-upload-mode" style="display: none">
           <div class="upload-section">
-            <h3> Select CSV File from Computer</h3>
+            <h3>Select CSV File from Computer</h3>
             <div class="file-input-wrapper">
               <input
                 type="file"
@@ -590,7 +885,12 @@
               <div class="file-name" id="batch-file-name"></div>
             </div>
 
-            <button onclick="predictBatchUpload()" style="width: 100%; padding: 15px; margin-top: 15px;">📊 Predict Batch</button>
+            <button
+              onclick="predictBatchUpload()"
+              style="width: 100%; padding: 15px; margin-top: 15px"
+            >
+              📊 Predict Batch
+            </button>
           </div>
         </div>
 
@@ -630,6 +930,25 @@
             console.error("checkStatus error:", error);
             statusDiv.className = "status not-trained";
             statusDiv.innerHTML = `<span>⚠️ Cannot connect to backend: ${error.message}. If you are opening the file directly (file://), run an HTTP server and open the page via http://localhost:8000; if the backend runs on a different port, update 'apiBase' in the code.</span>`;
+          });
+      }
+
+      function fetchAndDisplayMetrics() {
+        const url = `${API_BASE_URL}/api/metrics`;
+
+        fetch(url)
+          .then((response) => {
+            if (!response.ok)
+              throw new Error(`${response.status} ${response.statusText}`);
+            return response.json();
+          })
+          .then((data) => {
+            if (data.status === "success" && data.metrics) {
+              displayMetrics(data.metrics);
+            }
+          })
+          .catch((error) => {
+            console.error("fetchAndDisplayMetrics error:", error);
           });
       }
 
@@ -719,9 +1038,406 @@
         document.getElementById(elementId).classList.add("active");
       }
 
+      function displayMetrics(data) {
+        // Display evaluation metrics in the metrics container
+        if (!data.precision || !data.recall || !data.f1_score) {
+          return; // No metrics available
+        }
+
+        // Update metric values
+        document.getElementById("metric-precision").textContent =
+          data.precision.toFixed(2) + "%";
+        document.getElementById("metric-recall").textContent =
+          data.recall.toFixed(2) + "%";
+        document.getElementById("metric-f1").textContent =
+          data.f1_score.toFixed(2) + "%";
+
+        // Update AUC metrics
+        if (data.pr_auc) {
+          document.getElementById("metric-pr-auc").textContent =
+            data.pr_auc.toFixed(4);
+        }
+        if (data.roc_auc) {
+          document.getElementById("metric-roc-auc").textContent =
+            data.roc_auc.toFixed(4);
+        }
+        if (data.optimal_threshold) {
+          document.getElementById("metric-optimal-threshold").textContent =
+            data.optimal_threshold.toFixed(3);
+        }
+
+        // Display confusion matrix
+        if (data.confusion_matrix) {
+          const cm = data.confusion_matrix;
+          document.getElementById("metric-tp-count").textContent =
+            cm.true_positives.toLocaleString();
+          const matrixHtml = `
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 12px; color: #666; margin-bottom: 8px; font-weight: 600;">🟩 True Negatives</div>
+              <div style="font-size: 28px; font-weight: bold; color: #4caf50;">${cm.true_negatives.toLocaleString()}</div>
+            </div>
+            <div style="background: #fff3e0; padding: 15px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 12px; color: #666; margin-bottom: 8px; font-weight: 600;">🟧 False Positives</div>
+              <div style="font-size: 28px; font-weight: bold; color: #ff9800;">${cm.false_positives.toLocaleString()}</div>
+            </div>
+            <div style="background: #ffebee; padding: 15px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 12px; color: #666; margin-bottom: 8px; font-weight: 600;">🟥 False Negatives</div>
+              <div style="font-size: 28px; font-weight: bold; color: #f44336;">${cm.false_negatives.toLocaleString()}</div>
+            </div>
+            <div style="background: #e8f5e9; padding: 15px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 12px; color: #666; margin-bottom: 8px; font-weight: 600;">✅ True Positives</div>
+              <div style="font-size: 28px; font-weight: bold; color: #2e7d32;">${cm.true_positives.toLocaleString()}</div>
+            </div>
+          `;
+          document.getElementById("confusion-matrix").innerHTML = matrixHtml;
+        }
+
+        // Display charts if data available
+        if (data.pr_curve) {
+          displayPRCurve(data.pr_curve);
+        }
+        if (data.roc_curve) {
+          displayROCCurve(data.roc_curve);
+        }
+        if (data.threshold_analysis) {
+          displayThresholdChart(data.threshold_analysis);
+        }
+        if (data.score_distribution) {
+          displayScoreDistribution(data.score_distribution);
+        }
+
+        // Show metrics container
+        const metricsContainer = document.getElementById("train-metrics");
+        if (metricsContainer) metricsContainer.style.display = "block";
+      }
+
+      function displayAccuracyCurve(accuracyHistory, canvasId) {
+        const ctx = document.getElementById(canvasId).getContext("2d");
+
+        // Destroy existing chart if it exists
+        if (window.accuracyChart) {
+          window.accuracyChart.destroy();
+        }
+
+        // Extract data from history
+        const epochs = accuracyHistory.map((d) => `Epoch ${d.epoch}`);
+        const accuracies = accuracyHistory.map((d) => d.accuracy);
+
+        // Create new chart
+        window.accuracyChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: epochs,
+            datasets: [
+              {
+                label: "Model Accuracy (%)",
+                data: accuracies,
+                borderColor: "#667eea",
+                backgroundColor: "rgba(102, 126, 234, 0.1)",
+                borderWidth: 3,
+                pointRadius: 6,
+                pointBackgroundColor: "#667eea",
+                pointBorderColor: "white",
+                pointBorderWidth: 2,
+                tension: 0.4,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                labels: {
+                  font: { size: 12, weight: "bold" },
+                  color: "#333",
+                },
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: false,
+                min: 75,
+                max: 100,
+                ticks: {
+                  color: "#666",
+                  font: { size: 11 },
+                  callback: function (value) {
+                    return value + "%";
+                  },
+                },
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                },
+              },
+              x: {
+                ticks: {
+                  color: "#666",
+                  font: { size: 11 },
+                },
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function displayPRCurve(prData) {
+        const ctx = document.getElementById("prCurveChart").getContext("2d");
+        if (
+          window.prCurveChart &&
+          typeof window.prCurveChart.destroy === "function"
+        ) {
+          window.prCurveChart.destroy();
+        }
+
+        window.prCurveChart = new Chart(ctx, {
+          type: "scatter",
+          data: {
+            datasets: [
+              {
+                label: "PR Curve",
+                data: prData.recall.map((r, i) => ({
+                  x: r,
+                  y: prData.precision[i],
+                })),
+                borderColor: "#2196F3",
+                backgroundColor: "rgba(33, 150, 243, 0.1)",
+                borderWidth: 3,
+                fill: true,
+                pointRadius: 3,
+                showLine: true,
+                tension: 0.4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                labels: { font: { size: 12, weight: "bold" }, color: "#333" },
+              },
+            },
+            scales: {
+              x: {
+                type: "linear",
+                position: "bottom",
+                title: { display: true, text: "Recall" },
+                min: 0,
+                max: 1,
+              },
+              y: {
+                title: { display: true, text: "Precision" },
+                min: 0,
+                max: 1,
+              },
+            },
+          },
+        });
+        const prContainer = document.getElementById("pr-curve-container");
+        if (prContainer) prContainer.style.display = "block";
+      }
+
+      function displayROCCurve(rocData) {
+        const ctx = document.getElementById("rocCurveChart").getContext("2d");
+        if (
+          window.rocCurveChart &&
+          typeof window.rocCurveChart.destroy === "function"
+        ) {
+          window.rocCurveChart.destroy();
+        }
+
+        window.rocCurveChart = new Chart(ctx, {
+          type: "scatter",
+          data: {
+            datasets: [
+              {
+                label: "ROC Curve",
+                data: rocData.fpr.map((f, i) => ({ x: f, y: rocData.tpr[i] })),
+                borderColor: "#FF5722",
+                backgroundColor: "rgba(255, 87, 34, 0.1)",
+                borderWidth: 3,
+                fill: true,
+                pointRadius: 3,
+                showLine: true,
+                tension: 0.4,
+              },
+              {
+                label: "Random Classifier",
+                data: [
+                  { x: 0, y: 0 },
+                  { x: 1, y: 1 },
+                ],
+                borderColor: "#999",
+                borderDash: [5, 5],
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                labels: { font: { size: 12, weight: "bold" }, color: "#333" },
+              },
+            },
+            scales: {
+              x: {
+                type: "linear",
+                position: "bottom",
+                title: { display: true, text: "False Positive Rate" },
+                min: 0,
+                max: 1,
+              },
+              y: {
+                title: { display: true, text: "True Positive Rate" },
+                min: 0,
+                max: 1,
+              },
+            },
+          },
+        });
+        const rocContainer = document.getElementById("roc-curve-container");
+        if (rocContainer) rocContainer.style.display = "block";
+      }
+
+      function displayThresholdChart(thresholdData) {
+        const ctx = document.getElementById("thresholdChart").getContext("2d");
+        if (
+          window.thresholdChart &&
+          typeof window.thresholdChart.destroy === "function"
+        ) {
+          window.thresholdChart.destroy();
+        }
+
+        window.thresholdChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: thresholdData.map((t) => t.threshold.toFixed(2)),
+            datasets: [
+              {
+                label: "Precision",
+                data: thresholdData.map((t) => (t.precision * 100).toFixed(2)),
+                borderColor: "#FF9800",
+                backgroundColor: "rgba(255, 152, 0, 0.1)",
+                borderWidth: 2.5,
+                pointRadius: 3,
+                tension: 0.4,
+              },
+              {
+                label: "Recall",
+                data: thresholdData.map((t) => (t.recall * 100).toFixed(2)),
+                borderColor: "#4CAF50",
+                backgroundColor: "rgba(76, 175, 80, 0.1)",
+                borderWidth: 2.5,
+                pointRadius: 3,
+                tension: 0.4,
+              },
+              {
+                label: "F1-Score",
+                data: thresholdData.map((t) => (t.f1_score * 100).toFixed(2)),
+                borderColor: "#9C27B0",
+                backgroundColor: "rgba(156, 39, 176, 0.1)",
+                borderWidth: 2.5,
+                pointRadius: 3,
+                tension: 0.4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                labels: { font: { size: 11, weight: "bold" }, color: "#333" },
+              },
+            },
+            scales: {
+              y: {
+                title: { display: true, text: "Score (%)" },
+                min: 0,
+                max: 100,
+                ticks: {
+                  callback: function (value) {
+                    return value + "%";
+                  },
+                },
+              },
+              x: { title: { display: true, text: "Threshold" } },
+            },
+          },
+        });
+        const thresholdContainer = document.getElementById(
+          "threshold-container",
+        );
+        if (thresholdContainer) thresholdContainer.style.display = "block";
+      }
+
+      function displayScoreDistribution(distData) {
+        const ctx = document
+          .getElementById("distributionChart")
+          .getContext("2d");
+        if (
+          window.distributionChart &&
+          typeof window.distributionChart.destroy === "function"
+        ) {
+          window.distributionChart.destroy();
+        }
+
+        window.distributionChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: distData.bins.map((b) => b.toFixed(2)),
+            datasets: [
+              {
+                label: "Normal",
+                data: distData.normal,
+                backgroundColor: "rgba(76, 175, 80, 0.6)",
+                borderColor: "#4CAF50",
+                borderWidth: 1,
+              },
+              {
+                label: "Abnormal",
+                data: distData.abnormal,
+                backgroundColor: "rgba(244, 67, 54, 0.6)",
+                borderColor: "#F44336",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                labels: { font: { size: 11, weight: "bold" }, color: "#333" },
+              },
+            },
+            scales: {
+              y: { title: { display: true, text: "Frequency" } },
+              x: { title: { display: true, text: "Anomaly Score" } },
+            },
+          },
+        });
+        const distContainer = document.getElementById("distribution-container");
+        if (distContainer) distContainer.style.display = "block";
+      }
+
       function trainModel() {
         const csvFile = document.getElementById("csv-file").value;
-        const contamination = 0.02; // Fixed default value
+        const contamination = 0.28; // Fixed default value (28% actual anomaly rate)
 
         showSpinner("train-spinner");
 
@@ -753,6 +1469,20 @@
                          <p>Expected anomalies: ~${Math.round(data.samples_trained * contamination).toLocaleString()}</p>`,
                 "success",
               );
+
+              // Display metrics if available
+              displayMetrics(data);
+
+              // Display accuracy curve if available
+              if (data.accuracy_history && data.accuracy_history.length > 0) {
+                displayAccuracyCurve(data.accuracy_history, "trainingChart");
+                const trainChartContainer = document.getElementById(
+                  "distribution-container",
+                );
+                if (trainChartContainer)
+                  trainChartContainer.style.display = "block";
+              }
+
               checkStatus();
             }
           })
@@ -768,7 +1498,7 @@
 
       function trainModelUpload() {
         const fileInput = document.getElementById("train-file-input");
-        const contamination = 0.02; // Fixed default value
+        const contamination = 0.28; // Fixed default value (28% actual anomaly rate)
 
         if (!fileInput.files || fileInput.files.length === 0) {
           showResult(
@@ -808,6 +1538,20 @@
                          <p>Expected anomalies: ~${Math.round(data.samples_trained * contamination).toLocaleString()}</p>`,
                 "success",
               );
+
+              // Display metrics if available
+              displayMetrics(data);
+
+              // Display accuracy curve if available
+              if (data.accuracy_history && data.accuracy_history.length > 0) {
+                displayAccuracyCurve(data.accuracy_history, "trainingChart");
+                const trainChartContainer = document.getElementById(
+                  "distribution-container",
+                );
+                if (trainChartContainer)
+                  trainChartContainer.style.display = "block";
+              }
+
               checkStatus();
             }
           })
@@ -961,12 +1705,13 @@
                     anomaly.login_result === 1 ? "❌ Failed" : "✅ Success";
                   const night = anomaly.is_night === 1 ? "🌙 Yes" : "☀️ No";
                   const timeDelta = anomaly.time_delta;
-                  const timeDeltaStr = timeDelta >= 3600 
-                    ? (timeDelta / 3600).toFixed(1) + "h"
-                    : timeDelta >= 60
-                    ? (timeDelta / 60).toFixed(0) + "m"
-                    : timeDelta + "s";
-                  
+                  const timeDeltaStr =
+                    timeDelta >= 3600
+                      ? (timeDelta / 3600).toFixed(1) + "h"
+                      : timeDelta >= 60
+                        ? (timeDelta / 60).toFixed(0) + "m"
+                        : timeDelta + "s";
+
                   html += `<tr>
                                 <td><span class="anomaly-badge">⚠️ ANOMALOUS</span></td>
                                 <td>${night}</td>
@@ -1064,12 +1809,13 @@
                     anomaly.login_result === 1 ? "❌ Failed" : "✅ Success";
                   const night = anomaly.is_night === 1 ? "🌙 Yes" : "☀️ No";
                   const timeDelta = anomaly.time_delta;
-                  const timeDeltaStr = timeDelta >= 3600 
-                    ? (timeDelta / 3600).toFixed(1) + "h"
-                    : timeDelta >= 60
-                    ? (timeDelta / 60).toFixed(0) + "m"
-                    : timeDelta + "s";
-                  
+                  const timeDeltaStr =
+                    timeDelta >= 3600
+                      ? (timeDelta / 3600).toFixed(1) + "h"
+                      : timeDelta >= 60
+                        ? (timeDelta / 60).toFixed(0) + "m"
+                        : timeDelta + "s";
+
                   html += `<tr>
                                 <td><span class="anomaly-badge">⚠️ ANOMALOUS</span></td>
                                 <td>${night}</td>

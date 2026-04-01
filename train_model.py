@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'ml'))
 from ml.train import train_isolation_forest, save_model
 from ml.preprocess import load_and_preprocess_csv
 
-def main(contamination=0.02, data_path='data/rfff-dataset.csv', model_path='model/isolation_forest.joblib'):
+def main(contamination=0.28, data_path='data/rfff-dataset.csv', model_path='model/isolation_forest.joblib'):
     """
     Script to train Isolation Forest model from CSV data
     
@@ -79,7 +79,7 @@ Examples:
         '--contamination', 
         type=float, 
         default=0.02,
-        help='Contamination rate: expected proportion of anomalies (0.01-0.03, default: 0.02)'
+        help='Contamination rate: expected proportion of anomalies (0.20-0.30, default: 0.28)
     )
     parser.add_argument(
         '--data', 

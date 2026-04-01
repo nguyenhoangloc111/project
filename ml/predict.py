@@ -30,20 +30,27 @@ def predict_anomaly(model, X_test):
     else:
         X_df = X_test
     
+    # Only apply heuristic refinement if the required columns exist
+    has_required_cols = all(col in X_df.columns for col in ['login_frequency', 'login_result', 'location_change', 'device_change', 'is_night'])
+    
+    if not has_required_cols:
+        # If columns don't exist (preprocessed data), return ML predictions only
+        return heuristic_predictions
+    
     for idx in range(len(X_df)):
         row = X_df.iloc[idx]
         
         # Count suspicious factors
         suspicious_count = 0
-        if row['login_result'] == 1:  # Failed login
+        if row.get('login_result', 1) == 1:  # Failed login
             suspicious_count += 2
-        if row['location_change'] == 1:  # Location change
+        if row.get('location_change', 0) == 1:  # Location change
             suspicious_count += 1
-        if row['device_change'] == 1:  # Device change
+        if row.get('device_change', 0) == 1:  # Device change
             suspicious_count += 1
-        if row['is_night'] == 1:  # Night login
+        if row.get('is_night', 0) == 1:  # Night login
             suspicious_count += 1
-        if row['login_frequency'] >= 10:  # High frequency
+        if row.get('login_frequency', 0) >= 10:  # High frequency
             suspicious_count += 1
         
         # Apply heuristic logic to override ML prediction
